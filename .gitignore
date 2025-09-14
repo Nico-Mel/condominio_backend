@@ -1,0 +1,58 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+ENV/
+env/
+.venv/
+
+# Environment variables
+.env
+
+# Django migrations
+**/migrations/*.py
+
+**/migrations/*.pyc
+**/migrations/__pycache__/
+**/migrations/*.pyo
+**/migrations/*.pyc
+
+# SQLite (por si usás en pruebas)
+*.sqlite3
+
+# Logs
+*.log
+
+# VS Code settings
+.vscode/
+
+# Python & JetBrains IDEs
+*.idea/
+*.iml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Test coverage
+htmlcov/
+.coverage
+coverage.xml
+
+# MyPy
+.mypy_cache/
+
+# Pytest
+.pytest_cache/
+
+# Pipenv
+Pipfile.lock
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
