@@ -3,11 +3,12 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
-from .models import Cuota, Pago, Expensa, DetalleCuota
+from .models import Cuota, Pago, Expensa, DetalleCuota, Multa
 from .serializers import (
     CuotaSerializer, CuotaCreateSerializer, CuotaResidenteSerializer,
     PagoSerializer, PagoCreateSerializer, PagoResidenteSerializer,
-    ExpensaSerializer, DetalleCuotaSerializer, DetalleCuotaCreateSerializer
+    ExpensaSerializer, DetalleCuotaSerializer, DetalleCuotaCreateSerializer,
+    MultaSerializer
 )
 
 # VIEWS PARA EXPENSAS (Administrador)
@@ -226,3 +227,109 @@ class GenerarCuotasMensualesAPIView(APIView):
             "message": f"Se generaron {len(cuotas_creadas)} cuotas para el período {periodo}",
             "cuotas": serializer.data
         }, status=status.HTTP_201_CREATED)
+    
+# VIEWS PARA MULTAS (Administrador)
+class MultaListCreateAPIView(APIView):
+    """Vista para listar y crear multas"""
+    
+    def get(self, request):
+        multas = Multa.objects.all().order_by('-fecha_creacion')
+        serializer = MultaSerializer(multas, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = MultaSerializer(data=request.data)
+        if serializer.is_valid():
+            # Asignar automáticamente el usuario creador
+            multa = serializer.save(creado_por=request.user)
+            
+            # La conversión a detalle_cuota es automática en el modelo save()
+            multa_serializer = MultaSerializer(multa)
+            return Response(multa_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class MultaDetailAPIView(APIView):
+    """Vista para detalle, actualizar y eliminar multas"""
+    
+    def get(self, request, pk):
+        multa = get_object_or_404(Multa, pk=pk)
+        serializer = MultaSerializer(multa)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        multa = get_object_or_404(Multa, pk=pk)
+        serializer = MultaSerializer(multa, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        multa = get_object_or_404(Multa, pk=pk)
+        multa.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# VISTAS ESPECIALES PARA MULTAS
+class MultaConvertirACuotaAPIView(APIView):
+    """Vista para forzar conversión de multa a cuota (por si no fue automática)"""
+    
+    def post(self, request, multa_id):
+        multa = get_object_or_404(Multa, pk=multa_id)
+        try:
+            detalle = multa.convertir_a_detalle_cuota()
+            return Response({
+                'message': 'Multa convertida a cuota exitosamente',
+                'detalle_cuota_id': detalle.id,
+                'cuota_id': detalle.cuota.id
+            })
+        except Exception as e:
+            return Response(
+                {'error': str(e)}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+class MultasPorResidenteAPIView(APIView):
+    """Vista para obtener multas por residente"""
+    
+    def get(self, request):
+        residente_id = request.query_params.get('residente_id')
+        if not residente_id:
+            return Response(
+                {'error': 'Parámetro residente_id requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        multas = Multa.objects.filter(residente_id=residente_id).order_by('-fecha_creacion')
+        serializer = MultaSerializer(multas, many=True)
+        return Response(serializer.data)
+
+class MultasPorResidenciaAPIView(APIView):
+    """Vista para obtener multas por residencia"""
+    
+    def get(self, request):
+        residencia_id = request.query_params.get('residencia_id')
+        if not residencia_id:
+            return Response(
+                {'error': 'Parámetro residencia_id requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        multas = Multa.objects.filter(residencia_id=residencia_id).order_by('-fecha_creacion')
+        serializer = MultaSerializer(multas, many=True)
+        return Response(serializer.data)
+
+class MisMultasAPIView(APIView):
+    """Vista para que un residente vea SUS multas"""
+    
+    def get(self, request):
+        # Solo residentes pueden ver sus propias multas
+        if not hasattr(request.user, 'residente'):
+            return Response(
+                {'error': 'Acceso denegado'}, 
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        residente = request.user.residente
+        multas = Multa.objects.filter(residente=residente).order_by('-fecha_creacion')
+        serializer = MultaSerializer(multas, many=True)
+        return Response(serializer.data)

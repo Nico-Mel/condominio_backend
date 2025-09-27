@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Expensa, Cuota, DetalleCuota, Pago
+from .models import Expensa, Cuota, DetalleCuota, Pago, Multa
 from django.db.models import Sum
 
 class ExpensaSerializer(serializers.ModelSerializer):
@@ -112,3 +112,20 @@ class ExpensaCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expensa
         fields = ['nombre', 'tipo', 'descripcion']
+
+class MultaSerializer(serializers.ModelSerializer):
+    residente_nombre = serializers.CharField(source='residente.user.get_full_name', read_only=True)
+    residencia_direccion = serializers.CharField(source='residencia.direccion', read_only=True)
+    creado_por_nombre = serializers.CharField(source='creado_por.get_full_name', read_only=True)
+    estado = serializers.CharField(read_only=True)  # propiedad @property
+    
+    class Meta:
+        model = Multa
+        fields = '__all__'
+        read_only_fields = ['fecha_creacion', 'detalle_cuota', 'creado_por']
+
+    def validate(self, data):
+        """Validar que tenga al menos residencia o residente"""
+        if not data.get('residencia') and not data.get('residente'):
+            raise serializers.ValidationError("Debe especificar residencia o residente")
+        return data

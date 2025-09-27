@@ -5,7 +5,9 @@ from .views import (
     CuotaListCreateAPIView, CuotaDetailAPIView,
     PagoListCreateAPIView, PagoDetailAPIView,
     MisCuotasAPIView, MisPagosAPIView, RealizarPagoAPIView,
-    CuotasPorResidenteAPIView, CuotasPorPeriodoAPIView, GenerarCuotasMensualesAPIView
+    CuotasPorResidenteAPIView, CuotasPorPeriodoAPIView, GenerarCuotasMensualesAPIView,
+    MultaListCreateAPIView, MultaDetailAPIView, MultaConvertirACuotaAPIView,
+    MultasPorResidenteAPIView, MultasPorResidenciaAPIView, MisMultasAPIView
 )
 
 urlpatterns = [
@@ -34,4 +36,11 @@ urlpatterns = [
     path('cuotas/residente/<uuid:residente_id>/', CuotasPorResidenteAPIView.as_view(), name='cuotas-por-residente'),
     path('cuotas/periodo/<str:periodo>/', CuotasPorPeriodoAPIView.as_view(), name='cuotas-por-periodo'),
     path('cuotas/generar-mensuales/', GenerarCuotasMensualesAPIView.as_view(), name='generar-cuotas-mensuales'),
+
+    path('multas/', MultaListCreateAPIView.as_view(), name='multa-list-create'),
+    path('multas/<int:pk>/', MultaDetailAPIView.as_view(), name='multa-detail'),
+    path('multas/<int:multa_id>/convertir/', MultaConvertirACuotaAPIView.as_view(), name='multa-convertir'),
+    path('multas/por-residente/', MultasPorResidenteAPIView.as_view(), name='multas-por-residente'),
+    path('multas/por-residencia/', MultasPorResidenciaAPIView.as_view(), name='multas-por-residencia'),
+    path('mis-multas/', MisMultasAPIView.as_view(), name='mis-multas'),
 ]

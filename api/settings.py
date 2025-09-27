@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     #'propiedades',
     'condominio',
     'finance',
+    'operations',
 ]
 
 MIDDLEWARE = [

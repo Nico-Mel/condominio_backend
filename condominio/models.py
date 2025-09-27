@@ -125,19 +125,17 @@ class Residencia(models.Model):
             if es_nuevo and self.tipo_contrato == 'alquiler' and self.esta_activa:
                 self.generar_cuota_alquiler_actual()
     
-    def generar_cuota_alquiler_actual(self):
-        """Genera cuota de alquiler para el mes actual"""
+    def generar_cuota_alquiler_actual(self, periodo=None):  #
+        """Genera cuota de alquiler para un periodo específico"""
         from django.utils import timezone
         from finance.models import Expensa, Cuota, DetalleCuota
-        
-        # 1. Verificar condiciones
-        if not self.debe_generar_alquiler():
+        # Obtener periodo (si no se especifica, usar actual)
+        if periodo is None:
+            periodo = timezone.now().strftime('%Y-%m')
+        # Verificar condiciones
+        if not self.debe_generar_alquiler(periodo):  
             return None
-            
-        # 2. Obtener periodo actual (YYYY-MM)
-        periodo_actual = timezone.now().strftime('%Y-%m')
-        
-        # 3. Buscar o crear Expensa de Alquiler
+        # Buscar o crear Expensa de Alquiler
         expensa_alquiler, creado = Expensa.objects.get_or_create(
             nombre="Alquiler Mensual",
             defaults={
@@ -146,29 +144,27 @@ class Residencia(models.Model):
                 'es_activo': True
             }
         )
-        
-        # 4. Buscar o crear Cuota del periodo
+        # Buscar o crear Cuota del periodo
         cuota, creada = Cuota.objects.get_or_create(
             residencia=self,
-            periodo=periodo_actual,
+            periodo=periodo, 
             defaults={
                 'fecha_emision': timezone.now().date(),
-                'monto_total': 0  # Se recalcula con detalles
+                'monto_total': 0
             }
-        )
-        
-        # 5. Crear DetalleCuota para el alquiler
+        ) 
+        # Crear DetalleCuota para el alquiler
         detalle = DetalleCuota.objects.create(
             cuota=cuota,
             expensa=expensa_alquiler,
             monto=self.unidad.precio_alquiler,
-            descripcion=f"Alquiler mensual - {periodo_actual}",
-            referencia=f"ALQUILER_{self.id}_{periodo_actual}",
-            fecha_vencimiento=self.calcular_fecha_vencimiento(periodo_actual)
+            descripcion=f"Alquiler mensual - {periodo}",  # ← USAR periodo
+            referencia=f"ALQUILER_{self.id}_{periodo}",  # ← USAR periodo
+            fecha_vencimiento=self.calcular_fecha_vencimiento(periodo)  # ← USAR periodo
         )
         
         return detalle
-    
+  
     def debe_generar_alquiler(self, periodo=None):
         """Verifica si debe generar cuota de alquiler"""
         from django.utils import timezone

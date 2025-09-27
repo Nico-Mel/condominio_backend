@@ -5,5 +5,6 @@ urlpatterns = [
     #path('api/propiedades/', include('propiedades.urls')), # Rutas para la app propiedades
     path('api/condominio/', include('condominio.urls')),  # Rutas para la app condominio
     path('api/finance/', include('finance.urls')),  # Rutas para la app finance
+    path('api/operations/', include('operations.urls')),  # Rutas para la app operations
     # api/urls.py
 ]
