@@ -35,10 +35,12 @@ INSTALLED_APPS = [
     #NECESARIAS
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    #eliminar antes de la migracion
     'corsheaders',
     'rest_framework',
     'accounts',
+    #'propiedades',
+    'condominio',
+    'finance',
 ]
 
 MIDDLEWARE = [
@@ -118,3 +120,14 @@ JWT_EXP_DELTA_SECONDS = 60 * 60 * 24  # 1 día
 
 # CORS configuration
 CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', cast=Csv())
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "accounts.authentication.JWTAuthentication",
+    ],
+    # Si aún no quieres bloquear todas las rutas, deja AllowAny por defecto
+    # y protegemos solo las que necesiten login (abajo en la vista).
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.AllowAny",
+    ],
+}

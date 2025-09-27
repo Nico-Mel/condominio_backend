@@ -1,10 +1,11 @@
+# accounts/urls.py
 from django.urls import path
 from .views import (
     RolListCreateAPIView, RolDetailAPIView,
     PermisoListCreateAPIView, PermisoDetailAPIView,
     RolPermisoListCreateAPIView, RolPermisoDetailAPIView,
     UsuarioListCreateAPIView, UsuarioDetailAPIView, UsuarioToggleActivoAPIView,
-    LoginView,
+    LoginView, ResidenteListCreateAPIView, ResidenteDetailAPIView
 )
 
 urlpatterns = [
@@ -24,7 +25,10 @@ urlpatterns = [
     path('usuarios/', UsuarioListCreateAPIView.as_view(), name='usuario-list-create'),
     path('usuarios/<uuid:pk>/', UsuarioDetailAPIView.as_view(), name='usuario-detail'),
     path('usuarios/<uuid:pk>/toggle-activo/', UsuarioToggleActivoAPIView.as_view(), name='usuario-toggle-activo'),
-
+    # Login
     path('login/', LoginView.as_view(), name='login'),
+
+    path('residentes/', ResidenteListCreateAPIView.as_view(), name='residente-list-create'),
+    path('residentes/<uuid:pk>/', ResidenteDetailAPIView.as_view(), name='residente-detail'),
 
 ]

@@ -9,6 +9,8 @@ ENV/
 env/
 .venv/
 
+notes.txt
+
 # Environment variables
 .env
 

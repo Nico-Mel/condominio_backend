@@ -22,3 +22,11 @@ venv\Scripts\activate   # en Windows
 
 # Instalar dependencias
 pip install -r requirements.txt
+
+```bash
+# Aplicar migraciones
+python manage.py migrate
+
+# Levantar el servidor de desarrollo
+python manage.py runserver
+```

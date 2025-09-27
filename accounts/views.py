@@ -1,3 +1,4 @@
+# accounts/views.py
 from django.shortcuts import render
 
 # Create your views here.
@@ -11,8 +12,9 @@ from accounts.serializers import LoginSerializer
 from utils.auth import jwt_auth_required
 import uuid
 
-from .models import Permiso, Rol, RolPermiso, Usuario
-from .serializers import PermisoSerializer, RolSerializer, RolPermisoSerializer, UsuarioSerializer
+from .models import Permiso, Rol, RolPermiso, Usuario, Residente
+from .serializers import PermisoSerializer, RolSerializer, RolPermisoSerializer, UsuarioSerializer, ResidenteSerializer
+
 
 class RolListCreateAPIView(APIView):
     def get(self, request):
@@ -110,19 +112,6 @@ class RolPermisoDetailAPIView(APIView):
         item = get_object_or_404(RolPermiso, pk=pk)
         item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-class UsuarioListCreateAPIView(APIView):
-    def get(self, request):
-        usuarios = Usuario.objects.all()
-        serializer = UsuarioSerializer(usuarios, many=True)
-        return Response(serializer.data)
-
-    def post(self, request):
-        serializer = UsuarioSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class UsuarioDetailAPIView(APIView):
     def get(self, request, pk):
@@ -208,3 +197,31 @@ class UsuarioListCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 #implementar @jwt_auth_required cuando el seeder este listo en todo
+
+
+class ResidenteListCreateAPIView(APIView):
+    def get(self, request):
+        residentes = Residente.objects.all()
+        serializer = ResidenteSerializer(residentes, many=True)
+        return Response(serializer.data)
+
+    def post(self, request):
+        serializer = ResidenteSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class ResidenteDetailAPIView(APIView):
+    def get(self, request, pk):
+        residente = get_object_or_404(Residente, pk=pk)
+        serializer = ResidenteSerializer(residente)
+        return Response(serializer.data)
+
+    def patch(self, request, pk):
+        residente = get_object_or_404(Residente, pk=pk)
+        serializer = ResidenteSerializer(residente, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
