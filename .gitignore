@@ -15,12 +15,7 @@ notes.txt
 .env
 
 # Django migrations
-**/migrations/*.py
 
-**/migrations/*.pyc
-**/migrations/__pycache__/
-**/migrations/*.pyo
-**/migrations/*.pyc
 
 # SQLite (por si usás en pruebas)
 *.sqlite3

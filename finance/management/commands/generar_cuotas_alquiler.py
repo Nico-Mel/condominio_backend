@@ -1,3 +1,4 @@
+#finance/management/commands/generar_cuotas_alquiler.py
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 from condominio.models import Residencia
